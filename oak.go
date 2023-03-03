@@ -1,6 +1,10 @@
 package oak
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
 
 type Oak struct {
 	routes  []string
@@ -15,9 +19,10 @@ func New() *Oak {
 	}
 }
 
-func (o *Oak) Get(path string, handler func(w http.ResponseWriter, r *http.Request)) {
+func (o *Oak) Get(path string, handlerFn http.HandlerFunc) {
+	fmt.Println(time.Time.String(time.Now()), path)
 	o.server.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r)
+		handlerFn(w, r)
 	})
 }
 
