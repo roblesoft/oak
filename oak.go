@@ -15,9 +15,9 @@ func New() *Oak {
 	}
 }
 
-func (o *Oak) Get(path string, handler func()) {
+func (o *Oak) Get(path string, handler func(w http.ResponseWriter, r *http.Request)) {
 	o.server.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		handler()
+		handler(w, r)
 	})
 }
 
