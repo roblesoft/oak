@@ -20,8 +20,8 @@ func New() *Oak {
 }
 
 func (o *Oak) Get(path string, handlerFn http.HandlerFunc) {
-	fmt.Println(time.Time.String(time.Now()), path)
 	o.server.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(time.Time.String(time.Now()), path)
 		handlerFn(w, r)
 	})
 }
