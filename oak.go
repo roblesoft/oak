@@ -46,31 +46,31 @@ func (o *Oak) saveRoute(method string, path string, handler http.HandlerFunc) {
 }
 
 func (o *Oak) GET(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("GET", path, handlerFn)
+	o.saveRoute(http.MethodGet, path, handlerFn)
 }
 
 func (o *Oak) POST(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("POST", path, handlerFn)
+	o.saveRoute(http.MethodPost, path, handlerFn)
 }
 
 func (o *Oak) PUT(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("PUT", path, handlerFn)
+	o.saveRoute(http.MethodPut, path, handlerFn)
 }
 
 func (o *Oak) DELETE(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("DELETE", path, handlerFn)
+	o.saveRoute(http.MethodDelete, path, handlerFn)
 }
 
 func (o *Oak) HEAD(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("HEAD", path, handlerFn)
+	o.saveRoute(http.MethodHead, path, handlerFn)
 }
 
 func (o *Oak) PATCH(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("PATCH", path, handlerFn)
+	o.saveRoute(http.MethodPatch, path, handlerFn)
 }
 
 func (o *Oak) OPTIONS(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute("OPTIONS", path, handlerFn)
+	o.saveRoute(http.MethodOptions, path, handlerFn)
 }
 
 func (o *Oak) ServeHTTP(w http.ResponseWriter, req *http.Request) {
