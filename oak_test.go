@@ -35,15 +35,36 @@ func TestGet(t *testing.T) {
 func TestServeHTTP(t *testing.T) {
 	oak := New()
 
-	oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World")
-	})
+	type testMethodsCases struct {
+		description string
+		req         *http.Request
+		res         *httptest.ResponseRecorder
+		want        int
+	}
 
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-	res := httptest.NewRecorder()
+	for _, scenario := range []testMethodsCases{
+		{
+			description: "Return status code 200",
+			req:         httptest.NewRequest(http.MethodGet, "/test", nil),
+			res:         httptest.NewRecorder(),
+			want:        200,
+		},
+		{
+			description: "Return status code 404",
+			req:         httptest.NewRequest(http.MethodPost, "/test", nil),
+			res:         httptest.NewRecorder(),
+			want:        404,
+		},
+	} {
+		t.Run(scenario.description, func(t *testing.T) {
+			oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintf(w, "Hello, World")
+			})
 
-	if oak.ServeHTTP(res, req); res.Result().StatusCode != 200 {
-		t.Errorf("not got status 200")
+			if oak.ServeHTTP(scenario.res, scenario.req); scenario.res.Result().StatusCode != scenario.want {
+				t.Errorf("not got status %d", scenario.want)
+			}
+		})
 	}
 }
 

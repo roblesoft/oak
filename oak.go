@@ -7,11 +7,12 @@ import (
 )
 
 type Oak struct {
-	routes  []string
-	AppName string
-	server  *http.ServeMux
-	logger  *log.Logger
-	trees   map[string]*node
+	routes   []string
+	AppName  string
+	server   *http.ServeMux
+	logger   *log.Logger
+	trees    map[string]*node
+	NotFound http.Handler
 }
 
 type Handle func(http.ResponseWriter, *http.Request)
@@ -27,7 +28,7 @@ func New() *Oak {
 		AppName: "Default",
 		server:  &http.ServeMux{},
 		logger:  log.New(os.Stdout, "Api: ", log.LstdFlags),
-		trees:   map[string]*node{},
+		trees:   nil,
 	}
 }
 
@@ -38,6 +39,10 @@ func (o *Oak) Handler(handler http.HandlerFunc) Handle {
 }
 
 func (o *Oak) saveRoute(method string, path string, handler http.HandlerFunc) {
+	if o.trees == nil {
+		o.trees = make(map[string]*node)
+	}
+
 	o.trees[method] = &node{
 		method:  method,
 		path:    path,
@@ -73,7 +78,17 @@ func (o *Oak) OPTIONS(path string, handlerFn http.HandlerFunc) {
 	o.saveRoute(http.MethodOptions, path, handlerFn)
 }
 
+// ServeHTTP to implement http.Handler interface
 func (o *Oak) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	o.logger.Println(req.Method, req.URL.Path)
-	o.trees[req.Method].handler(w, req)
+	handler := o.trees[req.Method]
+
+	// handle not found
+	if handler == nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	handler.handler(w, req)
+
 }
