@@ -1,7 +1,6 @@
 package oak
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,15 @@ type Oak struct {
 	AppName string
 	server  *http.ServeMux
 	logger  *log.Logger
+	trees   map[string]*node
+}
+
+type Handle func(http.ResponseWriter, *http.Request)
+
+type node struct {
+	method  string
+	path    string
+	handler Handle
 }
 
 func New() *Oak {
@@ -19,44 +27,53 @@ func New() *Oak {
 		AppName: "Default",
 		server:  &http.ServeMux{},
 		logger:  log.New(os.Stdout, "Api: ", log.LstdFlags),
+		trees:   map[string]*node{},
 	}
 }
 
-func (o *Oak) saveRoute(handler http.HandlerFunc) http.HandlerFunc {
+func (o *Oak) Handler(handler http.HandlerFunc) Handle {
 	return func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r)
+		handler.ServeHTTP(w, r)
+	}
+}
+
+func (o *Oak) saveRoute(method string, path string, handler http.HandlerFunc) {
+	o.trees[method] = &node{
+		method:  method,
+		path:    path,
+		handler: o.Handler(handler),
 	}
 }
 
 func (o *Oak) GET(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("GET", path, handlerFn)
 }
 
 func (o *Oak) POST(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("POST", path, handlerFn)
 }
 
 func (o *Oak) PUT(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("PUT", path, handlerFn)
 }
 
 func (o *Oak) DELETE(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("DELETE", path, handlerFn)
 }
 
 func (o *Oak) HEAD(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("HEAD", path, handlerFn)
 }
 
 func (o *Oak) PATCH(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("PATCH", path, handlerFn)
 }
 
 func (o *Oak) OPTIONS(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(handlerFn)
+	o.saveRoute("OPTIONS", path, handlerFn)
 }
 
 func (o *Oak) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Hello, world")
-	fmt.Fprint(w, req.Method)
+	o.logger.Println(req.Method, req.URL.Path)
+	o.trees[req.Method].handler(w, req)
 }
