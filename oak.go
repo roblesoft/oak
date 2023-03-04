@@ -1,9 +1,7 @@
 package oak
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 )
 
 type Oak struct {
@@ -20,10 +18,7 @@ func New() *Oak {
 }
 
 func (o *Oak) Get(path string, handlerFn http.HandlerFunc) {
-	o.server.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(time.Time.String(time.Now()), path)
-		handlerFn(w, r)
-	})
+	o.server.Handle(path, handlerFn)
 }
 
 func (o *Oak) Run() {
