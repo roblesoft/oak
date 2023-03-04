@@ -1,12 +1,10 @@
 package oak
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"time"
 )
 
 type Oak struct {
@@ -24,53 +22,41 @@ func New() *Oak {
 	}
 }
 
+func (o *Oak) saveRoute(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r)
+	}
+}
+
 func (o *Oak) GET(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) POST(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) PUT(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) DELETE(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) HEAD(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) PATCH(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
 func (o *Oak) OPTIONS(path string, handlerFn http.HandlerFunc) {
-	o.server.Handle(path, handlerFn)
+	o.saveRoute(handlerFn)
 }
 
-func (o *Oak) Run() {
-	s := http.Server{
-		Addr:    ":3000",
-		Handler: o.server,
-	}
-
-	go func() {
-		err := s.ListenAndServe()
-		if err != nil {
-			o.logger.Fatal(err)
-		}
-	}()
-
-	sigChannel := make(chan os.Signal)
-	signal.Notify(sigChannel, os.Interrupt)
-	signal.Notify(sigChannel, os.Kill)
-	sig := <-sigChannel
-	o.logger.Println("Received terminate, graceful shutdown", sig)
-	timeoutContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	s.Shutdown(timeoutContext)
+func (o *Oak) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "Hello, world")
+	fmt.Fprint(w, req.Method)
 }

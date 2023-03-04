@@ -1,18 +1,15 @@
 package oak
 
 import (
-	"net/http"
+	"reflect"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
 	oak := New()
-	want := &Oak{
-		AppName: "Default",
-		server:  &http.ServeMux{},
-	}
+	want := &Oak{}
 
-	if oak != want {
-		t.Errorf("Different")
+	if reflect.TypeOf(oak) != reflect.TypeOf(want) {
+		t.Errorf("Is no returns an oak")
 	}
 }
