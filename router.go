@@ -77,9 +77,12 @@ func (o *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	o.logger.Println(req.Method, req.URL.Path)
 	path := req.URL.Path
 	root := o.trees[req.Method]
-	root = root.getNode(path)
 
 	// handle not found
+	if root != nil {
+		root = root.getNode(path)
+	}
+
 	if root != nil {
 		root.getValue()(w, req)
 		return

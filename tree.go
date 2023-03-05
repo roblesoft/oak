@@ -8,7 +8,10 @@ type node struct {
 }
 
 func (n *node) getValue() Handle {
-	return n.handler
+	if n != nil {
+		return n.handler
+	}
+	return nil
 }
 
 func (n *node) getNode(path string) *node {
