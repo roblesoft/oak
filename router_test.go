@@ -2,15 +2,17 @@ package oak
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	oak := New()
-	want := &Oak{}
+	oak := &Router{trees: nil}
+	want := &Router{}
 
 	if reflect.TypeOf(oak) != reflect.TypeOf(want) {
 		t.Errorf("Is no returns an oak")
@@ -18,7 +20,10 @@ func TestNew(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	oak := New()
+	oak := &Router{
+		trees:  nil,
+		logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
+	}
 
 	oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 		return
@@ -33,7 +38,10 @@ func TestGet(t *testing.T) {
 }
 
 func TestServeHTTP(t *testing.T) {
-	oak := New()
+	oak := &Router{
+		trees:  nil,
+		logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
+	}
 
 	type testMethodsCases struct {
 		description string
@@ -69,7 +77,10 @@ func TestServeHTTP(t *testing.T) {
 }
 
 func BenchmarkGet(b *testing.B) {
-	oak := New()
+	oak := &Router{
+		trees:  nil,
+		logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
+	}
 
 	oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 		return
@@ -85,7 +96,10 @@ func BenchmarkGet(b *testing.B) {
 }
 
 func BenchmarkServeHTTP(b *testing.B) {
-	oak := New()
+	oak := &Router{
+		trees:  nil,
+		logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
+	}
 
 	oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, World")
