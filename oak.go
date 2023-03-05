@@ -44,6 +44,36 @@ func (o *Oak) GET(path string, handle OakHandle) {
 	o.router.GET(path, handler)
 }
 
+func (o *Oak) POST(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.POST(path, handler)
+}
+
+func (o *Oak) PATCH(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.PATCH(path, handler)
+}
+
+func (o *Oak) PUT(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.PUT(path, handler)
+}
+
+func (o *Oak) DELETE(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.DELETE(path, handler)
+}
+
+func (o *Oak) HEAD(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.HEAD(path, handler)
+}
+
+func (o *Oak) OPTIONS(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
+	o.router.OPTIONS(path, handler)
+}
+
 func (o *Oak) Run() {
 	o.Server.Handler = o.router
 	go func() {
