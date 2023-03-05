@@ -22,8 +22,8 @@ func New() *Oak {
 
 type OakHandle func(ctx *Ctx)
 
-func (o *Oak) GET(path string, handle OakHandle) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
+func (o *Oak) oakHandleToHandlerFunc(handle OakHandle) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := &Ctx{
 			Context:  context.Background(),
 			response: w,
@@ -31,6 +31,10 @@ func (o *Oak) GET(path string, handle OakHandle) {
 		}
 		handle(ctx)
 	}
+}
+
+func (o *Oak) GET(path string, handle OakHandle) {
+	handler := o.oakHandleToHandlerFunc(handle)
 	o.router.GET(path, handler)
 }
 
