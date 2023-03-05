@@ -5,14 +5,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 )
 
 type Oak struct {
 	router *Router
+	Server *http.Server
 }
 
 func New() *Oak {
 	return &Oak{
+		Server: &http.Server{
+			Addr: ":3000",
+		},
 		router: &Router{
 			logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
 			trees:  nil,
@@ -39,5 +45,20 @@ func (o *Oak) GET(path string, handle OakHandle) {
 }
 
 func (o *Oak) Run() {
-	http.ListenAndServe(":3000", o.router)
+	o.Server.Handler = o.router
+	go func() {
+		err := o.Server.ListenAndServe()
+		if err != nil {
+			o.router.logger.Fatal(err)
+		}
+	}()
+
+	sigChannel := make(chan os.Signal)
+	signal.Notify(sigChannel, os.Interrupt)
+	signal.Notify(sigChannel, os.Kill)
+	sig := <-sigChannel
+	o.router.logger.Println("Received terminate, graceful shutdown", sig)
+	timeoutContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	o.Server.Shutdown(timeoutContext)
 }
