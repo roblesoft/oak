@@ -74,6 +74,14 @@ func BenchmarkGet(b *testing.B) {
 	oak.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 		return
 	})
+
+	oak.GET("/test2", func(w http.ResponseWriter, r *http.Request) {
+		return
+	})
+
+	oak.GET("/test3", func(w http.ResponseWriter, r *http.Request) {
+		return
+	})
 }
 
 func BenchmarkServeHTTP(b *testing.B) {

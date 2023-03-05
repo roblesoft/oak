@@ -7,9 +7,6 @@ import (
 )
 
 type Oak struct {
-	routes   []string
-	AppName  string
-	server   *http.ServeMux
 	logger   *log.Logger
 	trees    map[string]*node
 	NotFound http.Handler
@@ -17,18 +14,10 @@ type Oak struct {
 
 type Handle func(http.ResponseWriter, *http.Request)
 
-type node struct {
-	method  string
-	path    string
-	handler Handle
-}
-
 func New() *Oak {
 	return &Oak{
-		AppName: "Default",
-		server:  &http.ServeMux{},
-		logger:  log.New(os.Stdout, "Api: ", log.LstdFlags),
-		trees:   nil,
+		logger: log.New(os.Stdout, "Api: ", log.LstdFlags),
+		trees:  nil,
 	}
 }
 
@@ -38,57 +27,71 @@ func (o *Oak) Handler(handler http.HandlerFunc) Handle {
 	}
 }
 
-func (o *Oak) saveRoute(method string, path string, handler http.HandlerFunc) {
+func (o *Oak) Handle(method string, path string, handler http.HandlerFunc) {
 	if o.trees == nil {
 		o.trees = make(map[string]*node)
 	}
 
-	o.trees[method] = &node{
-		method:  method,
-		path:    path,
-		handler: o.Handler(handler),
+	if o.trees[method] != nil {
+		root := o.trees[method]
+		for len(root.children) != 0 {
+			root = root.children[0]
+		}
+		root.children = append(root.children,
+			&node{
+				method:  method,
+				path:    path,
+				handler: o.Handler(handler),
+			})
+	} else {
+		o.trees[method] = &node{
+			method:  method,
+			path:    path,
+			handler: o.Handler(handler),
+		}
 	}
 }
 
 func (o *Oak) GET(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodGet, path, handlerFn)
+	o.Handle(http.MethodGet, path, handlerFn)
 }
 
 func (o *Oak) POST(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodPost, path, handlerFn)
+	o.Handle(http.MethodPost, path, handlerFn)
 }
 
 func (o *Oak) PUT(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodPut, path, handlerFn)
+	o.Handle(http.MethodPut, path, handlerFn)
 }
 
 func (o *Oak) DELETE(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodDelete, path, handlerFn)
+	o.Handle(http.MethodDelete, path, handlerFn)
 }
 
 func (o *Oak) HEAD(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodHead, path, handlerFn)
+	o.Handle(http.MethodHead, path, handlerFn)
 }
 
 func (o *Oak) PATCH(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodPatch, path, handlerFn)
+	o.Handle(http.MethodPatch, path, handlerFn)
 }
 
 func (o *Oak) OPTIONS(path string, handlerFn http.HandlerFunc) {
-	o.saveRoute(http.MethodOptions, path, handlerFn)
+	o.Handle(http.MethodOptions, path, handlerFn)
 }
 
 // ServeHTTP to implement http.Handler interface
 func (o *Oak) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	o.logger.Println(req.Method, req.URL.Path)
-	handler := o.trees[req.Method]
+	path := req.URL.Path
+	root := o.trees[req.Method]
+	root = root.getNode(path)
 
 	// handle not found
-	if handler == nil {
-		http.NotFound(w, req)
+	if root != nil {
+		root.getValue()(w, req)
 		return
 	}
 
-	handler.handler(w, req)
-
+	http.NotFound(w, req)
 }
