@@ -1,6 +1,6 @@
 # Oak
 
-Oak is a http web framework
+Oak is a http web framework without third pary dependencies
 
 # Example
 
